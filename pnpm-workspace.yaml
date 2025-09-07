@@ -1,0 +1,41 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+
+# Catalog for shared dependencies
+catalog:
+  # Core dependencies
+  typescript: ^5.3.3
+  '@types/node': ^20.10.0
+  
+  # Testing
+  vitest: ^1.0.4
+  '@vitest/ui': ^1.0.4
+  
+  # Linting & Formatting
+  eslint: ^8.55.0
+  prettier: ^3.1.1
+  
+  # AWS
+  '@aws-sdk/client-dynamodb': ^3.450.0
+  '@aws-sdk/lib-dynamodb': ^3.450.0
+  'aws-cdk-lib': ^2.110.0
+  'constructs': ^10.3.0
+  
+  # API Framework
+  'express': ^4.18.2
+  '@types/express': ^4.17.21
+  'cors': ^2.8.5
+  '@types/cors': ^2.8.17
+  
+  # Frontend
+  'react': ^18.2.0
+  'react-dom': ^18.2.0
+  '@types/react': ^18.2.45
+  '@types/react-dom': ^18.2.18
+  'vite': ^5.0.8
+  '@vitejs/plugin-react': ^4.2.1
+  
+  # Utilities
+  'zod': ^3.22.4
+  'date-fns': ^2.30.0

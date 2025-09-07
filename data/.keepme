@@ -1,0 +1,9 @@
+# Data Directory
+
+This directory should contain the CSV data files for the livestock health monitoring system.
+
+Please download the data files from the Google Drive link provided in the README.md file.
+
+Required files:
+- sensor_readings.csv (738MB)
+- health_labels.csv (290MB)
