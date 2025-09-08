@@ -2,7 +2,7 @@
 
 A RESTful API service for the Smart Livestock Health & Financial Risk Assessment Platform. This service provides endpoints for managing animal data, sensor readings, and health predictions.
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Node.js 18+
@@ -24,13 +24,13 @@ pnpm dev
 
 The API will be available at `http://localhost:3001`
 
-## 📚 API Documentation
+## API Documentation
 
 Interactive API documentation is available at:
 - **Swagger UI**: http://localhost:3001/api-docs
 - **OpenAPI JSON**: http://localhost:3001/api-docs.json
 
-## 🛠️ Available Scripts
+## Available Scripts
 
 ```bash
 pnpm dev          # Start development server with hot reload
@@ -43,7 +43,7 @@ pnpm type-check   # Run TypeScript type checking
 pnpm clean        # Remove build artifacts
 ```
 
-## 📡 API Endpoints
+## API Endpoints
 
 ### Health Check
 - `GET /health` - Basic health check
@@ -65,7 +65,7 @@ pnpm clean        # Remove build artifacts
 ### Health Predictions (Bonus Challenge)
 - `POST /api/v1/predictions/health` - Generate health prediction (mock implementation)
 
-## 🔍 Example Requests
+## Example Requests
 
 ### Get All Animals
 ```bash
@@ -134,7 +134,7 @@ apps/api/
 └── README.md
 ```
 
-## 🔧 Configuration
+## Configuration
 
 The API server can be configured via environment variables:
 
@@ -142,31 +142,31 @@ The API server can be configured via environment variables:
 - `NODE_ENV` - Environment (development/production)
 - `CORS_ORIGINS` - Allowed CORS origins
 
-## 📈 Features
+## Features
 
 ### Current Implementation
-✅ Animal management endpoints  
-✅ Sensor data retrieval  
-✅ Health check endpoints  
-✅ Swagger documentation  
-✅ Error handling & validation  
-✅ CORS & security middleware  
-✅ CSV data loading service  
+- Animal management endpoints  
+- Sensor data retrieval  
+- Health check endpoints  
+- Swagger documentation  
+- Error handling & validation  
+- CORS & security middleware  
+- CSV data loading service  
 
 ### Bonus Challenge Opportunities
-🎯 **Machine Learning Integration**
+**Machine Learning Integration**
 - Replace mock prediction endpoint with real ML model
 - Implement health status prediction based on sensor data
 - Add risk assessment algorithms
 
-🎯 **Enhanced Features**
+**Enhanced Features**
 - Real-time sensor data streaming
 - Advanced analytics and reporting
 - Database integration
 - Authentication & authorization
 - Caching layer
 
-## 🧪 Testing
+## Testing
 
 The API includes comprehensive error handling and validation:
 - Input validation with Zod schemas
@@ -174,7 +174,7 @@ The API includes comprehensive error handling and validation:
 - HTTP status code consistency
 - Request/response logging
 
-## 🔐 Security
+## Security
 
 Security measures implemented:
 - **Helmet.js** - Security headers
@@ -182,14 +182,14 @@ Security measures implemented:
 - **Rate limiting** - Request throttling
 - **Input validation** - Prevents malformed requests
 
-## 📝 Development Notes
+## Development Notes
 
 - Mock data is generated for 50 animals across 5 farms
 - Sensor data is loaded from CSV files in development
 - All responses follow a consistent API response format
 - Comprehensive Swagger documentation for all endpoints
 
-## 🚀 Production Deployment
+## Production Deployment
 
 For production deployment:
 
