@@ -147,72 +147,6 @@ function SystemStatus() {
   )
 }
 
-function RecentAnimals() {
-  const { data: animals, isLoading } = useAnimals()
-  
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Animals</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="animate-pulse space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="flex items-center space-x-4">
-                <div className="h-10 w-10 bg-gray-200 rounded-full"></div>
-                <div className="space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-20"></div>
-                  <div className="h-3 bg-gray-200 rounded w-32"></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    )
-  }
-
-  const recentAnimals = animals?.animals.slice(0, 5) || []
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Recent Animals</CardTitle>
-        <CardDescription>
-          Latest animals added to the platform
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {recentAnimals.map((animal) => (
-            <div key={animal.id} className="flex items-center space-x-4">
-              <div className="h-10 w-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-semibold">
-                {animal.id.slice(0, 2).toUpperCase()}
-              </div>
-              <div className="flex-1 space-y-1">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium">Animal {animal.id}</p>
-                  <Badge variant={getHealthStatusStyles(animal.healthStatus) as any}>
-                    {formatHealthStatus(animal.healthStatus)}
-                  </Badge>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {animal.breed} • Farm {animal.farmId}
-                </p>
-              </div>
-            </div>
-          ))}
-          {recentAnimals.length === 0 && (
-            <div className="text-center py-4 text-muted-foreground">
-              No animals found
-            </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
 
 export default function DashboardPage() {
   return (
@@ -230,13 +164,8 @@ export default function DashboardPage() {
         <DashboardStats />
       </Suspense>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <div className="md:col-span-1 lg:col-span-4">
-          <Suspense fallback={<div>Loading animals...</div>}>
-            <RecentAnimals />
-          </Suspense>
-        </div>
-        <div className="md:col-span-1 lg:col-span-3">
+      <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
+        <div>
           <Suspense fallback={<div>Loading system status...</div>}>
             <SystemStatus />
           </Suspense>

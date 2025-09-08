@@ -3,12 +3,8 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { 
-  BarChart3, 
   Heart, 
   Home, 
-  Activity, 
-  AlertTriangle, 
-  DollarSign,
   Menu,
   X
 } from 'lucide-react'
@@ -19,10 +15,6 @@ import { useState } from 'react'
 const navigation = [
   { name: 'Dashboard', href: '/', icon: Home },
   { name: 'Animals', href: '/animals', icon: Heart },
-  { name: 'Sensors', href: '/sensors', icon: Activity },
-  { name: 'Predictions', href: '/predictions', icon: BarChart3 },
-  { name: 'Alerts', href: '/alerts', icon: AlertTriangle },
-  { name: 'Financial', href: '/financial', icon: DollarSign },
 ]
 
 interface NavigationProps {

@@ -1,6 +1,6 @@
 import type { Animal, SensorReading, HealthPrediction } from '@livestock/types'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || ''
 
 class ApiClient {
   private async fetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
@@ -24,29 +24,34 @@ class ApiClient {
   // Animals API
   animals = {
     getAll: async (): Promise<{ animals: Animal[]; count: number }> => {
-      return this.fetch('/api/animals')
+      const response: any = await this.fetch('/api/v1/animals')
+      const animals = response.data?.data || []
+      return {
+        animals,
+        count: animals.length
+      }
     },
 
     getById: async (id: string): Promise<Animal> => {
-      return this.fetch(`/api/animals/${id}`)
+      return this.fetch(`/api/v1/animals/${id}`)
     },
 
     create: async (animal: Omit<Animal, 'id' | 'lastUpdated'>): Promise<Animal> => {
-      return this.fetch('/api/animals', {
+      return this.fetch('/api/v1/animals', {
         method: 'POST',
         body: JSON.stringify(animal),
       })
     },
 
     update: async (id: string, data: Partial<Animal>): Promise<Animal> => {
-      return this.fetch(`/api/animals/${id}`, {
+      return this.fetch(`/api/v1/animals/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data),
       })
     },
 
     delete: async (id: string): Promise<void> => {
-      return this.fetch(`/api/animals/${id}`, {
+      return this.fetch(`/api/v1/animals/${id}`, {
         method: 'DELETE',
       })
     },
@@ -92,11 +97,11 @@ class ApiClient {
   // Health API
   health = {
     check: async (): Promise<{ status: string; version: string; timestamp: string }> => {
-      return this.fetch('/api/health')
+      return this.fetch('/health')
     },
     
     getHealth: async (): Promise<{ status: string; version: string; timestamp: string }> => {
-      return this.fetch('/api/health')
+      return this.fetch('/health')
     },
   }
 
