@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { useAnimals } from '@/hooks/use-animals'
 import { useSystemHealth } from '@/hooks/use-dashboard'
 import { formatHealthStatus, formatDateTime, getHealthStatusStyles } from '@/lib/utils'
-import { HealthStatus } from '@livestock/types'
+import type { HealthStatus } from '@livestock/types'
 import { Activity, AlertTriangle, Heart, TrendingUp } from 'lucide-react'
 
 function HealthStatusCard({ status, count, title }: { 
@@ -14,17 +14,15 @@ function HealthStatusCard({ status, count, title }: {
   count: number
   title: string 
 }) {
-  const styles = getHealthStatusStyles(status)
-  
   return (
-    <Card className={`${styles.bg} ${styles.border}`}>
+    <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <Heart className={`h-4 w-4 ${styles.icon}`} />
+        <Heart className="h-4 w-4" />
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{count}</div>
-        <Badge variant={status} className="mt-1">
+        <Badge variant={getHealthStatusStyles(status) as any} className="mt-1">
           {formatHealthStatus(status)}
         </Badge>
       </CardContent>
@@ -195,7 +193,7 @@ function RecentAnimals() {
               <div className="flex-1 space-y-1">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium">Animal {animal.id}</p>
-                  <Badge variant={animal.healthStatus}>
+                  <Badge variant={getHealthStatusStyles(animal.healthStatus) as any}>
                     {formatHealthStatus(animal.healthStatus)}
                   </Badge>
                 </div>

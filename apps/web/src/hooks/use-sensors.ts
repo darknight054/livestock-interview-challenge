@@ -38,7 +38,7 @@ export function useSubmitSensorData() {
     mutationFn: (readings: SensorReading[]) => sensorsApi.submitData(readings),
     onSuccess: (_, readings) => {
       // Invalidate sensor queries for all animals that had data submitted
-      const animalIds = [...new Set(readings.map(r => r.animalId))]
+      const animalIds = Array.from(new Set(readings.map(r => r.animalId)))
       
       animalIds.forEach(animalId => {
         queryClient.invalidateQueries({ 

@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { cn } from '@/lib/utils'
 import { 
   BarChart3, 
   Heart, 
@@ -14,6 +13,7 @@ import {
   X
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import { useState } from 'react'
 
 const navigation = [
@@ -84,7 +84,7 @@ export function Navigation({ className }: NavigationProps) {
               return (
                 <Link
                   key={item.name}
-                  href={item.href}
+                  href={item.href as any}
                   onClick={() => setMobileMenuOpen(false)}
                   className={cn(
                     'group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors',

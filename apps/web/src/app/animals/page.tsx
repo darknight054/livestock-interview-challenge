@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useAnimals } from '@/hooks/use-animals'
 import { formatHealthStatus, formatDate, getHealthStatusStyles, getAnimalAvatarUrl } from '@/lib/utils'
-import { Animal, HealthStatus } from '@livestock/types'
+import type { Animal, HealthStatus } from '@livestock/types'
 import { Search, Filter, Plus, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
 
@@ -31,7 +31,7 @@ function AnimalCard({ animal }: { animal: Animal }) {
                   {animal.breed} • Farm {animal.farmId}
                 </p>
               </div>
-              <Badge variant={animal.healthStatus}>
+              <Badge variant={styles as any}>
                 {formatHealthStatus(animal.healthStatus)}
               </Badge>
             </div>
@@ -52,7 +52,7 @@ function AnimalCard({ animal }: { animal: Animal }) {
             </div>
             
             <div className="mt-4 flex items-center justify-between">
-              <Link href={`/animals/${animal.id}`}>
+              <Link href={`/animals/${animal.id}` as any}>
                 <Button variant="outline" size="sm">
                   View Details
                 </Button>
