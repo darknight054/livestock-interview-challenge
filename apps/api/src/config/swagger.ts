@@ -165,16 +165,11 @@ const options: swaggerJsdoc.Options = {
         },
         HealthPrediction: {
           type: 'object',
-          required: ['id', 'animalId', 'timestamp', 'healthStatus', 'confidence', 'predictedDiseases', 'riskFactors', 'recommendations'],
+          required: ['animalId', 'timestamp', 'healthStatus', 'confidence'],
           properties: {
-            id: {
-              type: 'string',
-              format: 'uuid',
-              description: 'Unique prediction identifier'
-            },
             animalId: {
               type: 'string',
-              pattern: '^[A-Z]\\d{3}$',
+              pattern: '^C\\d{3}$',
               example: 'C001',
               description: 'Animal identifier'
             },
@@ -185,7 +180,7 @@ const options: swaggerJsdoc.Options = {
             },
             healthStatus: {
               type: 'string',
-              enum: ['healthy', 'at_risk', 'sick', 'critical'],
+              example: 'healthy',
               description: 'Predicted health status'
             },
             confidence: {
@@ -195,101 +190,10 @@ const options: swaggerJsdoc.Options = {
               example: 0.85,
               description: 'Prediction confidence (0-1)'
             },
-            predictedDiseases: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  type: {
-                    type: 'string',
-                    enum: ['mastitis', 'lameness', 'respiratory', 'digestive', 'reproductive', 'metabolic']
-                  },
-                  probability: {
-                    type: 'number',
-                    minimum: 0,
-                    maximum: 1
-                  },
-                  severity: {
-                    type: 'string',
-                    enum: ['mild', 'moderate', 'severe', 'critical']
-                  },
-                  expectedOnset: {
-                    type: 'string',
-                    format: 'date-time'
-                  }
-                }
-              }
-            },
-            riskFactors: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  factor: { type: 'string' },
-                  weight: { type: 'number', minimum: 0, maximum: 1 },
-                  description: { type: 'string' }
-                }
-              }
-            },
-            recommendations: {
-              type: 'array',
-              items: { type: 'string' }
-            }
-          }
-        },
-        FinancialRisk: {
-          type: 'object',
-          required: ['animalId', 'timestamp', 'riskScore', 'expectedLoss', 'insurancePremiumRecommendation', 'marketImpact', 'treatmentCosts'],
-          properties: {
-            animalId: {
+            message: {
               type: 'string',
-              pattern: '^[A-Z]\\d{3}$',
-              example: 'C001'
-            },
-            timestamp: {
-              type: 'string',
-              format: 'date-time'
-            },
-            riskScore: {
-              type: 'integer',
-              minimum: 0,
-              maximum: 100,
-              example: 35
-            },
-            expectedLoss: {
-              type: 'number',
-              minimum: 0,
-              example: 750.50
-            },
-            insurancePremiumRecommendation: {
-              type: 'number',
-              minimum: 0,
-              maximum: 1,
-              example: 0.045
-            },
-            marketImpact: {
-              type: 'object',
-              properties: {
-                currentValue: { type: 'number', minimum: 0 },
-                potentialLoss: { type: 'number', minimum: 0 },
-                timeToRecovery: { type: 'integer', minimum: 0 },
-                marketPriceImpact: { type: 'number', minimum: 0, maximum: 1 }
-              }
-            },
-            treatmentCosts: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  diseaseType: {
-                    type: 'string',
-                    enum: ['mastitis', 'lameness', 'respiratory', 'digestive', 'reproductive', 'metabolic']
-                  },
-                  estimatedCost: { type: 'number', minimum: 0 },
-                  duration: { type: 'integer', minimum: 0 },
-                  successRate: { type: 'number', minimum: 0, maximum: 1 }
-                }
-              }
+              example: 'This is a mock prediction. Implement ML model for bonus challenge.',
+              description: 'Additional prediction message'
             }
           }
         },
@@ -357,7 +261,11 @@ const options: swaggerJsdoc.Options = {
     tags: [
       {
         name: 'Health',
-        description: 'Animal health monitoring endpoints'
+        description: 'API health check endpoints'
+      },
+      {
+        name: 'Animals',
+        description: 'Animal management endpoints'
       },
       {
         name: 'Sensors',
@@ -365,23 +273,7 @@ const options: swaggerJsdoc.Options = {
       },
       {
         name: 'Predictions',
-        description: 'Health prediction endpoints'
-      },
-      {
-        name: 'Financial',
-        description: 'Financial risk assessment endpoints'
-      },
-      {
-        name: 'Animals',
-        description: 'Animal management endpoints'
-      },
-      {
-        name: 'Farms',
-        description: 'Farm management endpoints'
-      },
-      {
-        name: 'Dashboard',
-        description: 'Dashboard data endpoints'
+        description: 'Health prediction endpoints (Bonus Challenge)'
       }
     ]
   },
