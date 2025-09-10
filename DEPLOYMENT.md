@@ -133,12 +133,16 @@ curl http://localhost:3001/health/metrics
 ### Troubleshooting
 - If you see no data from analytics api and data import has been completed successfully,
 Run this four docker commands and check if its preparing the materialistic views:
+```bash
 docker exec -it *postgres_container name* psql -U username -d livestock_monitoring -c "CALL refresh_continuous_aggregate('sensor_readings_5min', NULL, NULL);"
 docker exec -it *postgres_container name* psql -U username -d livestock_monitoring -c "CALL refresh_continuous_aggregate('sensor_readings_15min', NULL, NULL);"
 docker exec -it *postgres_container name* psql -U username -d livestock_monitoring -c "CALL refresh_continuous_aggregate('sensor_readings_1hour', NULL, NULL);"
 docker exec -it *postgres_container name* psql -U username -d livestock_monitoring -c "CALL refresh_continuous_aggregate('sensor_readings_1day', NULL, NULL);"
+```
 
 - If you see that the you made changes to the db and it is not getting updated:
-Possible reasons could be redis caching, check the TTL or if its urgent: docker exec -it *redis container name* redis-cli -a redis123 FLUSHALL
-
+Possible reasons could be redis caching, check the TTL or if its urgent:
+```bash
+docker exec -it *redis container name* redis-cli -a redis123 FLUSHALL
+```
 
