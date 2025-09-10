@@ -38,7 +38,7 @@ pnpm import-data
 ```bash
 # Start API and Web services
 pnpm dev:api
-onpm dev:web
+pnpm dev:web
 
 # Check health status
 curl http://localhost:3001/health/detailed
