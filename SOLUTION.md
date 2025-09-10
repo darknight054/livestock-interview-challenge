@@ -1,3 +1,5 @@
+First things first: DEPLOYMENT.md should answer all the deployment related questions.
+
 Apologies for dumping the thoughts in this manner. (Ran heavily into Time Constraint and did not feel like I should extend it any more)
 
 The assignment targets two things which I felt were required to be addressed.
