@@ -89,7 +89,6 @@ GET  /api/v1/sensors/batch             # Batch sensor data
 # Analytics & Time-Series
 GET  /api/v1/analytics/sensor/:id/timeseries  # Aggregated data
 GET  /api/v1/analytics/farm/:id/overview      # Farm analytics
-GET  /api/v1/analytics/health/predictions     # Health predictions
 ```
 
 ### Time-Series Resolutions
