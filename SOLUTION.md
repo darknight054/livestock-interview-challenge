@@ -2,6 +2,8 @@ First things first: DEPLOYMENT.md should answer all the deployment related quest
 
 Apologies for dumping the thoughts in this manner. (Ran heavily into Time Constraint and did not feel like I should extend it any more)
 
+Important assumption: The db query to fetch from views has been written to reflect the date of the data which is one year prior, we can remove the offset if not required
+
 The assignment targets two things which I felt were required to be addressed.
 1. How to replace loading of CSV's with better strategy?
 What is better than an actual database, I observed that the database which we had to choose had to be something which can handle timeseries data and hence, I researched on possible options for the same. The best option which I felt was Postgres + Timescaledb extension.
