@@ -32,13 +32,7 @@ I think we have covered most of the parts of the assignment so lets talk about s
 3. Unit tests would have been great to write and would have definitely used AI for it. But, writing them is important because it helps in the overall CI/CD pipeline making sure that all the code we push is having backward compatibility and if its a significant change, we can document it.
 4. Not managing variables in centralised manner for redis caching and some other constant variables.
 
-Lastly, apologies for this dump of thoughts, instead of proper techincal drafted document. However, I hope this did cover:
-Your optimization approach and rationale
-Key architectural decisions
-Trade-offs you considered
-How you used AI tools during development
-Performance measurements (before/after)
-If you tackled optional challenges, describe your approach
+Lastly, apologies for this dump of thoughts, instead of proper techincal drafted document. However, I hope this did cover all the major points
 
 Also, on performance measurements I think we do have sub 100ms response times now, although I would not be pretty happy right now about it because in a production environment, the views that we generate and the data ingestion that would happen would be quite large and the only way we can be sure that this POC would work is to deploy in actual environment. I think the generation of materialised views will take some time based on the data size it has to index but it should work quite decently.
 
