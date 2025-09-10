@@ -1,14 +1,11 @@
 import { Router } from 'express'
 import { createApiResponse, createApiError } from '@livestock/shared'
 import { HTTP_STATUS, ERROR_CODES } from '@livestock/shared'
-import { generateMockAnimals } from '@livestock/shared'
 import { asyncHandler, createCustomError } from '@/middleware/error-handler'
 import { GetHealthParamsSchema, PaginationParamsSchema } from '@livestock/shared'
+import { cacheService } from '@/services/cache-service'
 
 const router: Router = Router()
-
-// Mock data store (in real implementation, this would be a database)
-const mockAnimals = generateMockAnimals(50)
 
 /**
  * @swagger
@@ -57,30 +54,18 @@ router.get('/', asyncHandler(async (req, res) => {
   const pagination = PaginationParamsSchema.parse(req.query)
   const { farmId, healthStatus } = req.query
 
-  let filteredAnimals = [...mockAnimals]
-
-  // Apply filters
-  if (farmId) {
-    filteredAnimals = filteredAnimals.filter(animal => animal.farmId === farmId)
-  }
-
-  if (healthStatus) {
-    filteredAnimals = filteredAnimals.filter(animal => animal.healthStatus === healthStatus)
-  }
-
-  // Apply pagination
-  const total = filteredAnimals.length
-  const startIndex = (pagination.page - 1) * pagination.limit
-  const paginatedAnimals = filteredAnimals.slice(startIndex, startIndex + pagination.limit)
+  // Get animals from database with efficient filtering and pagination
+  const result = await cacheService.getAnimals({
+    page: pagination.page,
+    limit: pagination.limit,
+    sortBy: pagination.sortBy || 'id',
+    sortOrder: pagination.sortOrder || 'asc',
+    farmId: farmId as string,
+    healthStatus: healthStatus as string
+  })
 
   const responseData = {
-    data: paginatedAnimals,
-    pagination: {
-      page: pagination.page,
-      limit: pagination.limit,
-      total,
-      pages: Math.ceil(total / pagination.limit)
-    },
+    ...result,
     filters: {
       farmId: farmId || null,
       healthStatus: healthStatus || null
@@ -88,6 +73,54 @@ router.get('/', asyncHandler(async (req, res) => {
   }
 
   res.json(createApiResponse(responseData))
+}))
+
+/**
+ * @swagger
+ * /animals/stats:
+ *   get:
+ *     summary: Get animal statistics
+ *     tags: [Animals]
+ *     description: Get aggregated statistics about all animals
+ *     responses:
+ *       200:
+ *         description: Statistics retrieved successfully
+ */
+router.get('/stats', asyncHandler(async (req, res) => {
+  // Get all animals for statistics calculation
+  const result = await cacheService.getAnimals({ page: 1, limit: 1000 })
+  const animals = result.data
+  
+  const stats = {
+    total: animals.length,
+    byHealthStatus: {
+      healthy: animals.filter(a => a.healthStatus === 'healthy').length,
+      at_risk: animals.filter(a => a.healthStatus === 'at_risk').length,
+      sick: animals.filter(a => a.healthStatus === 'sick').length,
+      critical: animals.filter(a => a.healthStatus === 'critical').length
+    },
+    byFarm: Object.entries(
+      animals.reduce((acc, animal) => {
+        acc[animal.farmId] = (acc[animal.farmId] || 0) + 1
+        return acc
+      }, {} as Record<string, number>)
+    ).map(([farmId, count]) => ({ farmId, count })),
+    averageWeight: Math.round(
+      animals
+        .filter(a => a.weight)
+        .reduce((sum, a) => sum + (typeof a.weight === 'string' ? parseFloat(a.weight) : (a.weight || 0)), 0) / 
+      animals.filter(a => a.weight).length
+    ) || 0,
+    breeds: Object.entries(
+      animals.reduce((acc, animal) => {
+        acc[animal.breed] = (acc[animal.breed] || 0) + 1
+        return acc
+      }, {} as Record<string, number>)
+    ).map(([breed, count]) => ({ breed, count }))
+      .sort((a, b) => b.count - a.count)
+  }
+
+  res.json(createApiResponse(stats))
 }))
 
 /**
@@ -122,7 +155,13 @@ router.get('/', asyncHandler(async (req, res) => {
 router.get('/:animalId', asyncHandler(async (req, res) => {
   const { animalId } = GetHealthParamsSchema.parse(req.params)
   
-  const animal = mockAnimals.find(a => a.id === animalId)
+  // Get animals from database (use reasonable limit to find the specific animal)
+  const result = await cacheService.getAnimals({ 
+    limit: 500, 
+    page: 1 
+  })
+  
+  const animal = result.data.find(a => a.id === animalId)
   
   if (!animal) {
     throw createCustomError(
@@ -132,7 +171,19 @@ router.get('/:animalId', asyncHandler(async (req, res) => {
     )
   }
 
-  res.json(createApiResponse(animal))
+  // Get latest sensor reading and health prediction for enriched response
+  const [latestSensor, latestHealth] = await Promise.all([
+    cacheService.getLatestSensorReading(animalId),
+    cacheService.getLatestHealthPrediction(animalId)
+  ])
+
+  const enrichedAnimal = {
+    ...animal,
+    latestSensorReading: latestSensor,
+    latestHealthPrediction: latestHealth
+  }
+
+  res.json(createApiResponse(enrichedAnimal))
 }))
 
 /**
@@ -168,7 +219,13 @@ router.get('/:animalId/history', asyncHandler(async (req, res) => {
   const { animalId } = GetHealthParamsSchema.parse(req.params)
   const days = Math.min(Number(req.query.days) || 30, 365)
   
-  const animal = mockAnimals.find(a => a.id === animalId)
+  // Get animals from database (use reasonable limit to find the specific animal)
+  const result = await cacheService.getAnimals({ 
+    limit: 500, 
+    page: 1 
+  })
+  
+  const animal = result.data.find(a => a.id === animalId)
   
   if (!animal) {
     throw createCustomError(
@@ -178,18 +235,72 @@ router.get('/:animalId/history', asyncHandler(async (req, res) => {
     )
   }
 
-  // Mock historical data
-  const history = Array.from({ length: days }, (_, i) => {
+  // Get actual historical data from database
+  const hours = days * 24
+  const [sensorReadings, healthLabels] = await Promise.all([
+    cacheService.getSensorReadings(animalId, { 
+      hours, 
+      limit: 1000 
+    }),
+    cacheService.getHealthLabels(animalId, { 
+      limit: days,
+      startTime: new Date(Date.now() - days * 24 * 60 * 60 * 1000)
+    })
+  ])
+
+  // Group sensor readings by date
+  const sensorByDate = sensorReadings.reduce((acc, reading) => {
+    const date = new Date(reading.timestamp).toISOString().split('T')[0]
+    if (!acc[date]) acc[date] = []
+    acc[date].push(reading)
+    return acc
+  }, {} as Record<string, any[]>)
+
+  // Group health labels by date
+  const healthByDate = healthLabels.reduce((acc, label) => {
+    const date = new Date(label.timestamp).toISOString().split('T')[0]
+    if (!acc[date]) acc[date] = []
+    acc[date].push(label)
+    return acc
+  }, {} as Record<string, any[]>)
+
+  // Create daily history from actual data
+  const history = []
+  for (let i = 0; i < days; i++) {
     const date = new Date()
     date.setDate(date.getDate() - i)
+    const dateStr = date.toISOString().split('T')[0]
     
-    return {
-      date: date.toISOString().split('T')[0],
-      healthStatus: i < 3 ? animal.healthStatus : 'healthy', // Show recent changes
-      weight: animal.weight ? animal.weight + (Math.random() - 0.5) * 20 : undefined,
-      notes: i === 0 ? 'Latest status update' : undefined
-    }
-  }).reverse()
+    const daySensors = sensorByDate[dateStr] || []
+    const dayHealth = healthByDate[dateStr] || []
+    
+    // Calculate daily averages
+    const avgTemp = daySensors.length > 0 
+      ? daySensors.reduce((sum, s) => sum + (s.temperature || 0), 0) / daySensors.length 
+      : null
+    const avgHeartRate = daySensors.length > 0 
+      ? daySensors.reduce((sum, s) => sum + (s.heartRate || 0), 0) / daySensors.length 
+      : null
+    
+    const latestHealth = dayHealth.length > 0 
+      ? dayHealth.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0]
+      : null
+
+    history.push({
+      date: dateStr,
+      sensorReadings: daySensors.length,
+      avgTemperature: avgTemp ? Math.round(avgTemp * 100) / 100 : null,
+      avgHeartRate: avgHeartRate ? Math.round(avgHeartRate) : null,
+      healthStatus: latestHealth?.healthStatus || null,
+      diseaseType: latestHealth?.diseaseType || null,
+      diseaseDay: latestHealth?.diseaseDay || null,
+      batteryLevel: daySensors.length > 0 
+        ? daySensors[daySensors.length - 1].batteryLevel 
+        : null
+    })
+  }
+  
+  history.reverse() // Show oldest to newest
 
   const responseData = {
     animalId,
@@ -198,50 +309,6 @@ router.get('/:animalId/history', asyncHandler(async (req, res) => {
   }
 
   res.json(createApiResponse(responseData))
-}))
-
-/**
- * @swagger
- * /animals/stats:
- *   get:
- *     summary: Get animal statistics
- *     tags: [Animals]
- *     description: Get aggregated statistics about all animals
- *     responses:
- *       200:
- *         description: Statistics retrieved successfully
- */
-router.get('/stats', asyncHandler(async (req, res) => {
-  const stats = {
-    total: mockAnimals.length,
-    byHealthStatus: {
-      healthy: mockAnimals.filter(a => a.healthStatus === 'healthy').length,
-      at_risk: mockAnimals.filter(a => a.healthStatus === 'at_risk').length,
-      sick: mockAnimals.filter(a => a.healthStatus === 'sick').length,
-      critical: mockAnimals.filter(a => a.healthStatus === 'critical').length
-    },
-    byFarm: Object.entries(
-      mockAnimals.reduce((acc, animal) => {
-        acc[animal.farmId] = (acc[animal.farmId] || 0) + 1
-        return acc
-      }, {} as Record<string, number>)
-    ).map(([farmId, count]) => ({ farmId, count })),
-    averageWeight: Math.round(
-      mockAnimals
-        .filter(a => a.weight)
-        .reduce((sum, a) => sum + (a.weight || 0), 0) / 
-      mockAnimals.filter(a => a.weight).length
-    ) || 0,
-    breeds: Object.entries(
-      mockAnimals.reduce((acc, animal) => {
-        acc[animal.breed] = (acc[animal.breed] || 0) + 1
-        return acc
-      }, {} as Record<string, number>)
-    ).map(([breed, count]) => ({ breed, count }))
-      .sort((a, b) => b.count - a.count)
-  }
-
-  res.json(createApiResponse(stats))
 }))
 
 export default router

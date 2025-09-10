@@ -7,8 +7,8 @@
   "scripts": {
     "build": "pnpm -r build",
     "dev": "pnpm -r dev",
-    "dev:api": "PORT=3001 pnpm --filter=@livestock/api dev",
-    "dev:web": "PORT=3002 pnpm --filter=@livestock/web dev",
+    "dev:api": "pnpm --filter=@livestock/api dev --port 3001",
+    "dev:web": "pnpm --filter=@livestock/web dev --port 3002",
     "test": "pnpm -r test",
     "test:watch": "pnpm -r test:watch",
     "lint": "pnpm -r lint",
@@ -16,43 +16,55 @@
     "clean": "pnpm -r clean",
     "deploy": "pnpm --filter=infrastructure deploy",
     "deploy:dev": "pnpm --filter=infrastructure deploy:dev",
-    "deploy:prod": "pnpm --filter=infrastructure deploy:prod"
+    "deploy:prod": "pnpm --filter=infrastructure deploy:prod",
+    "import-data": "tsx scripts/import-csv-data.ts",
+    "db:setup": "docker-compose up -d postgres redis && sleep 10",
+    "db:migrate": "pnpm db:setup && pnpm import-data",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f"
   },
   "workspaces": [
     "packages/*",
     "apps/*"
   ],
   "devDependencies": {
+    "@aws-sdk/client-dynamodb": "^3.450.0",
+    "@aws-sdk/lib-dynamodb": "^3.450.0",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
     "@types/node": "^20.10.0",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
     "@typescript-eslint/eslint-plugin": "^6.14.0",
     "@typescript-eslint/parser": "^6.14.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "@vitest/ui": "^1.0.4",
+    "aws-cdk-lib": "^2.110.0",
+    "constructs": "^10.3.0",
+    "cors": "^2.8.5",
+    "date-fns": "^2.30.0",
+    "dotenv": "^17.2.2",
     "eslint": "^8.55.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.0.1",
-    "prettier": "^3.1.1",
-    "typescript": "^5.3.3",
-    "vitest": "^1.0.4",
-    "@aws-sdk/client-dynamodb": "^3.450.0",
-    "@aws-sdk/lib-dynamodb": "^3.450.0",
-    "aws-cdk-lib": "^2.110.0",
-    "constructs": "^10.3.0",
     "express": "^4.18.2",
-    "@types/express": "^4.17.21",
-    "cors": "^2.8.5",
-    "@types/cors": "^2.8.17",
+    "helmet": "^7.1.0",
+    "prettier": "^3.1.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "@types/react": "^18.2.45",
-    "@types/react-dom": "^18.2.18",
+    "tsx": "^4.6.2",
+    "typescript": "^5.3.3",
     "vite": "^5.0.8",
-    "@vitejs/plugin-react": "^4.2.1",
-    "zod": "^3.22.4",
-    "date-fns": "^2.30.0",
-    "@vitest/ui": "^1.0.4"
+    "vitest": "^1.0.4",
+    "zod": "^3.22.4"
   },
   "engines": {
     "node": ">=18.0.0",
     "pnpm": ">=8.0.0"
   },
-  "packageManager": "pnpm@8.12.0"
+  "packageManager": "pnpm@8.12.0",
+  "dependencies": {
+    "csv-parse": "^6.1.0"
+  }
 }

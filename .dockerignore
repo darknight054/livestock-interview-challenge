@@ -1,0 +1,53 @@
+# Data files (will be mounted as volume)
+data/
+
+# Dependencies (install fresh in container)
+node_modules/
+**/node_modules/
+apps/*/node_modules/
+packages/*/node_modules/
+dist/
+**/dist/
+packages/*/dist/
+
+# Git and development files
+.git/
+.devcontainer/
+.claude/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+
+# Coverage and build artifacts
+coverage/
+.nyc_output/
+dist/
+build/
+tmp/
+temp/
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
+.vuepress/dist/
+.serverless/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+*.claude
+*.devcontainer
+
+# Environment files (use .env in container)
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env

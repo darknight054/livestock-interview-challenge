@@ -156,3 +156,5 @@ credentials/
 
 data/*.csv
 data/*.json
+*.claude
+*.devcontainer

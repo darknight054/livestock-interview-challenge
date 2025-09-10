@@ -6,7 +6,8 @@ import {
   Heart, 
   Home, 
   Menu,
-  X
+  X,
+  BarChart3
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -15,6 +16,7 @@ import { useState } from 'react'
 const navigation = [
   { name: 'Dashboard', href: '/', icon: Home },
   { name: 'Animals', href: '/animals', icon: Heart },
+  { name: 'Analytics', href: '/analytics', icon: BarChart3 },
 ]
 
 interface NavigationProps {

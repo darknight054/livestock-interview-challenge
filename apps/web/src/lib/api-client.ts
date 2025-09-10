@@ -130,6 +130,57 @@ class ApiClient {
       return this.fetch(`/api/financial/animals/${animalId}/risk`)
     },
   }
+
+  // Analytics API
+  analytics = {
+    getTimeSeries: async (animalId: string, params: {
+      resolution: '5min' | '15min' | '1hour' | '1day'
+      hours?: number
+      metrics?: string
+    }): Promise<any> => {
+      const query = new URLSearchParams({
+        resolution: params.resolution,
+        ...(params.hours && { hours: params.hours.toString() }),
+        ...(params.metrics && { metrics: params.metrics })
+      })
+      return this.fetch(`/api/v1/analytics/sensor/${animalId}/timeseries?${query}`)
+    },
+
+    getFarmOverview: async (farmId: string, params: {
+      resolution?: '1hour' | '1day'
+      days?: number
+    } = {}): Promise<any> => {
+      const query = new URLSearchParams({
+        resolution: params.resolution || '1hour',
+        days: (params.days || 7).toString()
+      })
+      return this.fetch(`/api/v1/analytics/farm/${farmId}/overview?${query}`)
+    },
+
+    getHealthPredictions: async (params: {
+      riskLevel?: 'all' | 'high' | 'critical'
+      farmId?: string
+      days?: number
+    } = {}): Promise<any> => {
+      const query = new URLSearchParams({
+        riskLevel: params.riskLevel || 'all',
+        days: (params.days || 7).toString(),
+        ...(params.farmId && { farmId: params.farmId })
+      })
+      return this.fetch(`/api/v1/analytics/health/predictions?${query}`)
+    },
+
+    getPerformanceBenchmarks: async (params: {
+      metric?: 'health' | 'productivity' | 'efficiency' | 'all'
+      period?: 'week' | 'month' | 'quarter' | 'year'
+    } = {}): Promise<any> => {
+      const query = new URLSearchParams({
+        metric: params.metric || 'all',
+        period: params.period || 'month'
+      })
+      return this.fetch(`/api/v1/analytics/performance/benchmarks?${query}`)
+    },
+  }
 }
 
 export const apiClient = new ApiClient()
@@ -141,5 +192,6 @@ export const {
   predictions: predictionsApi, 
   health: healthApi,
   dashboard: dashboardApi,
-  financial: financialApi
+  financial: financialApi,
+  analytics: analyticsApi
 } = apiClient

@@ -7,7 +7,7 @@ import {
   GetHealthParamsSchema,
   PaginationParamsSchema 
 } from '@livestock/shared'
-import { csvDataLoader } from '@/services/csv-data-loader'
+import { cacheService } from '@/services/cache-service'
 
 const router: Router = Router()
 
@@ -36,19 +36,16 @@ const router: Router = Router()
 router.get('/:animalId/latest', asyncHandler(async (req, res) => {
   const { animalId } = GetHealthParamsSchema.parse(req.params)
   
-  // Get latest reading from CSV data
-  const readings = await csvDataLoader.getSensorReadings(animalId, { limit: 1 })
+  // Get latest reading from cache/database (optimized with Redis caching)
+  const latestReading = await cacheService.getLatestSensorReading(animalId)
   
-  if (readings.length === 0) {
+  if (!latestReading) {
     throw createCustomError(
       `No sensor data found for animal ${animalId}`,
       HTTP_STATUS.NOT_FOUND,
       ERROR_CODES.ANIMAL_NOT_FOUND
     )
   }
-
-  // Get the latest reading
-  const latestReading = readings[0]
 
   res.json(createApiResponse(latestReading))
 }))
@@ -95,15 +92,17 @@ router.get('/:animalId/latest', asyncHandler(async (req, res) => {
 router.get('/:animalId/history', asyncHandler(async (req, res) => {
   const { animalId } = GetHealthParamsSchema.parse(req.params)
   const pagination = PaginationParamsSchema.parse(req.query)
-  const hours = Math.min(Number(req.query.hours) || 24, 168) // Max 1 week
+  const hours = Math.min(Number(req.query.hours) || 24, 17520) // Max 2 years for historical data
 
-  // Get readings from CSV data with time filter
-  const readings = await csvDataLoader.getSensorReadings(animalId, {
+  // Get readings from cache/database with intelligent caching
+  const offset = (pagination.page - 1) * pagination.limit
+  const readings = await cacheService.getSensorReadings(animalId, {
     hours,
-    limit: pagination.limit * 10 // Get more data for pagination
+    limit: pagination.limit,
+    offset
   })
 
-  if (readings.length === 0) {
+  if (readings.length === 0 && pagination.page === 1) {
     throw createCustomError(
       `No sensor data found for animal ${animalId}`,
       HTTP_STATUS.NOT_FOUND,
@@ -111,20 +110,17 @@ router.get('/:animalId/history', asyncHandler(async (req, res) => {
     )
   }
 
-  // Sort by timestamp (most recent first)
-  const sortedReadings = readings.sort((a, b) => 
-    new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-  )
-
-  // Apply pagination
-  const total = sortedReadings.length
-  const startIndex = (pagination.page - 1) * pagination.limit
-  const paginatedReadings = sortedReadings.slice(startIndex, startIndex + pagination.limit)
+  // Get total count for pagination (only for first page to improve performance)
+  let total = readings.length
+  if (pagination.page === 1) {
+    // For better performance, estimate total based on hours if we have full page
+    total = readings.length === pagination.limit ? pagination.limit * 10 : readings.length
+  }
 
   const responseData = {
     animalId,
     period: `${hours} hours`,
-    data: paginatedReadings,
+    data: readings,
     pagination: {
       page: pagination.page,
       limit: pagination.limit,
@@ -132,10 +128,10 @@ router.get('/:animalId/history', asyncHandler(async (req, res) => {
       pages: Math.ceil(total / pagination.limit)
     },
     summary: {
-      totalReadings: total,
+      totalReadings: readings.length,
       timeRange: {
-        from: sortedReadings[sortedReadings.length - 1]?.timestamp,
-        to: sortedReadings[0]?.timestamp
+        from: readings[readings.length - 1]?.timestamp,
+        to: readings[0]?.timestamp
       }
     }
   }
@@ -193,11 +189,11 @@ router.get('/batch', asyncHandler(async (req, res) => {
   }
 
   const animalIds = animalIdsParam.split(',').map(id => id.trim())
-  const hours = Math.min(Number(req.query.hours) || 24, 168)
+  const hours = Math.min(Number(req.query.hours) || 24, 17520) // Max 2 years for historical data
   const limitPerAnimal = Math.min(Number(req.query.limit) || 50, 100)
 
-  // Get batch data from CSV
-  const batchData = await csvDataLoader.getBatchSensorReadings(animalIds, {
+  // Get batch data from cache/database (optimized with intelligent caching)
+  const batchData = await cacheService.getBatchSensorReadings(animalIds, {
     hours,
     limitPerAnimal
   })
