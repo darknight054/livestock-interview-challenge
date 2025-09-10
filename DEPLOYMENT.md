@@ -30,7 +30,7 @@ docker-compose logs -f postgres redis
 # Import CSV data to database
 pnpm import-data
 
-# This will process 7.8M+ sensor records efficiently
+# This will process 7.8M+ sensor records efficiently the batch size is 2000 right now, feel free to reduce it by changing the scripts/import-csv-data.ts script and finding the BATCH_SIZE variable.
 # ⏱️ Expected time: 20-25 minutes for complete import
 ```
 
