@@ -47,7 +47,7 @@ curl http://localhost:3001/health/detailed
 ### 5. Access Applications
 - **API**: http://localhost:3001
 - **API Documentation**: http://localhost:3001/api-docs
-- **Web Dashboard**: http://localhost:3000
+- **Web Dashboard**: http://localhost:3002
 - **Health Check**: http://localhost:3001/health
 
 ---
