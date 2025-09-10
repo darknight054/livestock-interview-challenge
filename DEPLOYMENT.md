@@ -29,6 +29,10 @@ docker-compose logs -f postgres redis
 ```bash
 # Import CSV data to database
 pnpm import-data
+docker exec -it *postgres_container name* psql -U postgres -d livestock_monitoring -c "CALL refresh_continuous_aggregate('sensor_readings_5min', NULL, NULL);"
+docker exec -it *postgres_container name* psql -U postgres -d livestock_monitoring -c "CALL refresh_continuous_aggregate('sensor_readings_15min', NULL, NULL);"
+docker exec -it *postgres_container name* psql -U postgres -d livestock_monitoring -c "CALL refresh_continuous_aggregate('sensor_readings_1hour', NULL, NULL);"
+docker exec -it *postgres_container name* psql -U postgres -d livestock_monitoring -c "CALL refresh_continuous_aggregate('sensor_readings_1day', NULL, NULL);"
 
 # This will process 7.8M+ sensor records efficiently the batch size is 2000 right now, feel free to reduce it by changing the scripts/import-csv-data.ts script and finding the BATCH_SIZE variable.
 # ⏱️ Expected time: 20-25 minutes for complete import
